@@ -1,13 +1,23 @@
 {
-  "generatedAt": "2026-08-25T00:00:00.000Z",
+  "generatedAt": "2026-08-25T09:34:45.282Z",
   "forms": [
     {
       "formId": "frm_b843221d",
       "title": "Test",
       "description": "",
       "schema": [
-        { "id": "u1", "type": "text", "label": "ID", "required": true },
-        { "id": "u3", "type": "email", "label": "email", "required": false }
+        {
+          "id": "u1",
+          "type": "text",
+          "label": "ID",
+          "required": true
+        },
+        {
+          "id": "u3",
+          "type": "email",
+          "label": "email",
+          "required": false
+        }
       ]
     },
     {
@@ -15,10 +25,31 @@
       "title": "Training Feedback form",
       "description": "",
       "schema": [
-        { "id": "u2", "type": "email", "label": "Email", "required": false },
-        { "id": "u3", "type": "text", "label": "Name", "required": false },
-        { "id": "u4", "type": "rating", "label": "Training Rating", "required": false, "max": "10" },
-        { "id": "u5", "type": "file", "label": "Photo", "required": false }
+        {
+          "id": "u2",
+          "type": "email",
+          "label": "Email",
+          "required": false
+        },
+        {
+          "id": "u3",
+          "type": "text",
+          "label": "Name",
+          "required": false
+        },
+        {
+          "id": "u4",
+          "type": "rating",
+          "label": "Training Rating",
+          "required": false,
+          "max": "10"
+        },
+        {
+          "id": "u5",
+          "type": "file",
+          "label": "Photo",
+          "required": false
+        }
       ]
     }
   ]
