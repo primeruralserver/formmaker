@@ -70,7 +70,16 @@ function doPost(e) {
  * Form registry operations
  * ------------------------------------------------------------------ */
 
+var FORMS_CACHE_KEY = 'listForms_v1';
+
 function listForms_() {
+  // Fast path: return the cached list without opening the spreadsheet.
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get(FORMS_CACHE_KEY);
+  if (cached) {
+    try { return JSON.parse(cached); } catch (e) { /* fall through and rebuild */ }
+  }
+
   var sheet = ensureRegistry_();
   var values = sheet.getDataRange().getValues();
   var out = [];
@@ -79,7 +88,13 @@ function listForms_() {
     if (String(row.active) === 'false') continue;
     out.push({ formId: row.formId, title: row.title, description: row.description });
   }
+  // Cache for 6 hours; writes bust it immediately so it never goes stale.
+  cache.put(FORMS_CACHE_KEY, JSON.stringify(out), 21600);
   return out;
+}
+
+function bustFormsCache_() {
+  CacheService.getScriptCache().remove(FORMS_CACHE_KEY);
 }
 
 function getForm_(formId) {
@@ -117,6 +132,7 @@ function createForm_(body) {
     true
   ]);
 
+  bustFormsCache_();
   return { formId: formId, tabName: tabName };
 }
 
@@ -141,6 +157,7 @@ function updateForm_(body) {
   registry.getRange(rec.rowNumber, colIndex).setValue(body.title || '');
   registry.getRange(rec.rowNumber, REGISTRY_HEADER.indexOf('description') + 1).setValue(body.description || '');
   registry.getRange(rec.rowNumber, REGISTRY_HEADER.indexOf('schemaJson') + 1).setValue(JSON.stringify(body.schema));
+  bustFormsCache_();
   return { formId: body.formId };
 }
 
@@ -150,6 +167,7 @@ function deleteForm_(formId) {
   var registry = ensureRegistry_();
   // Soft delete: flag inactive so submissions/history are preserved.
   registry.getRange(rec.rowNumber, REGISTRY_HEADER.indexOf('active') + 1).setValue(false);
+  bustFormsCache_();
   return formId;
 }
 
