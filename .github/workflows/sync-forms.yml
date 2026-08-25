@@ -1,0 +1,51 @@
+name: Sync forms catalog
+
+# Refreshes data/catalog.json from the Apps Script Web App so GitHub Pages can
+# serve the form catalog instantly. Runs on a schedule and can be triggered
+# manually (Actions tab -> Sync forms catalog -> Run workflow).
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # every 15 minutes (GitHub may delay under load)
+  workflow_dispatch: {}
+
+concurrency:
+  group: sync-forms
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch catalog from Apps Script
+        run: |
+          set -euo pipefail
+          API=$(grep -oE "https://script.google.com/macros/s/[^']+/exec" config.js | head -n1)
+          if [ -z "$API" ]; then echo "API_URL not found in config.js"; exit 1; fi
+          echo "Fetching from: $API"
+          # Follow the /exec -> googleusercontent redirect; retry on transient failures.
+          curl -sSL --retry 3 --retry-delay 5 "$API?action=export" -o resp.json
+          # Bail out unless the response is valid and ok:true (never overwrite with garbage).
+          if ! jq -e '.ok == true and (.catalog.forms | type == "array")' resp.json >/dev/null; then
+            echo "Bad response from Apps Script:"; cat resp.json; exit 1
+          fi
+          mkdir -p data
+          jq '.catalog' resp.json > data/catalog.json
+          rm -f resp.json
+
+      - name: Commit if changed
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/catalog.json; then
+            echo "Catalog unchanged — nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/catalog.json
+          git commit -m "chore: sync forms catalog [skip ci]"
+          git push

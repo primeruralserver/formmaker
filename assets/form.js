@@ -21,18 +21,50 @@
     return;
   }
 
-  API.getForm(formId).then(function (form) {
+  var painted = false;
+
+  function paint(form) {
+    // Don't repaint if the user has already started filling the form.
+    if (painted && formTouched()) return;
     schema = form.schema || [];
     statusEl.classList.add('hidden');
     card.classList.remove('hidden');
     document.getElementById('title').textContent = form.title || 'Form';
     document.title = form.title || 'Form';
     var desc = document.getElementById('description');
-    if (form.description) { desc.textContent = form.description; } else { desc.classList.add('hidden'); }
+    if (form.description) { desc.textContent = form.description; desc.classList.remove('hidden'); }
+    else { desc.classList.add('hidden'); }
     renderFields();
+    painted = true;
+  }
+
+  function formTouched() {
+    // Any non-empty control means the visitor started answering.
+    var els = theForm.querySelectorAll('input, textarea, select');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if ((el.type === 'checkbox' || el.type === 'radio') && el.checked) return true;
+      if (el.type !== 'checkbox' && el.type !== 'radio' && el.value) return true;
+    }
+    var star = fieldsEl.querySelector('.stars[data-value]:not([data-value="0"])');
+    return !!star;
+  }
+
+  // 1) Instant render from the static catalog if this form is already cached.
+  API.getCatalog().then(function (cat) {
+    var hit = (cat.forms || []).filter(function (f) { return f.formId === formId; })[0];
+    if (hit && !painted) paint(hit);
+  }).catch(function () { /* no catalog — the live fetch below covers it */ });
+
+  // 2) Live fetch: renders a form newer than the last sync, and refreshes an
+  //    edited schema. Only surfaces an error if nothing was painted from cache.
+  API.getForm(formId).then(function (form) {
+    paint(form);
   }).catch(function (err) {
-    statusEl.className = 'notice err';
-    statusEl.textContent = err.message;
+    if (!painted) {
+      statusEl.className = 'notice err';
+      statusEl.textContent = err.message;
+    }
   });
 
   function renderFields() {

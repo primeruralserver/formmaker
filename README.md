@@ -72,6 +72,16 @@ window.APP_CONFIG = { API_URL: 'https://script.google.com/macros/s/XXXX/exec' };
 ## Field types
 Short text · Long text · Number (optional min/max) · Email · Date · Dropdown · Single choice (radio) · Multiple choice (checkboxes, joined with `, ` in the cell) · Rating/scale (stars) · File upload (Drive link).
 
+## Fast loading (static catalog cache)
+Apps Script has an unavoidable per-request latency (cold start + the `/exec` redirect). To make loading feel instant, the app keeps a **static catalog** of forms that GitHub Pages serves from its CDN:
+
+- `data/catalog.json` holds every active form and its schema.
+- `index.html` and `form.html` paint **instantly** from `catalog.json` (no Apps Script call), then do a background **comparison check** against the live Web App. A form created since the last sync still shows up — at normal Apps Script speed — while everything already in the catalog is instant.
+- The **`Sync forms catalog`** GitHub Action (`.github/workflows/sync-forms.yml`) refreshes `catalog.json` from the `export` endpoint every ~15 minutes and on demand (Actions tab → Run workflow). It only commits when something changed, so a newly created form moves into the "instant" tier on the next sync.
+- Server-side, `listForms`/`export` results are cached in Apps Script `CacheService` and busted automatically on any create/edit/delete.
+
+> Requires the `export` action in `Code.gs` — redeploy the Web App (new version) after updating the script. The Action reads your `/exec` URL straight from `config.js`, so there's nothing else to configure.
+
 ## Notes & limits
 - The passphrase is a shared secret compared server-side over HTTPS — enough to stop casual tampering, not a full auth system. Upgrade to Google Sign-In later if needed.
 - Deleting a form is a **soft delete** (marked inactive); its tab and responses are kept.

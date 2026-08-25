@@ -9,6 +9,13 @@
     });
   }
 
+  function slim(forms) {
+    // Normalise to just what the list needs, so cache/live/API compare equal.
+    return (forms || []).map(function (f) {
+      return { formId: f.formId, title: f.title, description: f.description || '' };
+    });
+  }
+
   function render(forms) {
     if (!forms || !forms.length) {
       listEl.innerHTML = '';
@@ -26,31 +33,38 @@
     }).join('');
   }
 
-  // 1) Instant paint from the last known list (stale-while-revalidate).
-  var hadCache = false;
-  try {
-    var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-    if (cached && cached.length) { hadCache = true; render(cached); }
-  } catch (e) { /* ignore corrupt cache */ }
+  var shown = null; // JSON string of what's currently rendered
 
-  if (!hadCache) {
-    statusEl.className = 'notice info';
-    statusEl.textContent = 'Loading forms…';
+  function show(forms) {
+    var slimmed = slim(forms);
+    var key = JSON.stringify(slimmed);
+    if (key === shown) return;
+    shown = key;
+    render(slimmed);
+    try { localStorage.setItem(CACHE_KEY, key); } catch (e) {}
   }
 
-  // 2) Fetch fresh in the background and update if anything changed.
-  API.listForms().then(function (forms) {
-    var fresh = JSON.stringify(forms);
-    var prev = localStorage.getItem(CACHE_KEY);
-    try { localStorage.setItem(CACHE_KEY, fresh); } catch (e) { /* storage full/blocked */ }
-    if (fresh !== prev) render(forms);
-    else statusEl.classList.add('hidden');
-  }).catch(function (err) {
-    // Keep showing cached results if we have them; only surface errors otherwise.
-    if (!hadCache) {
-      statusEl.className = 'notice err';
-      statusEl.textContent = err.message;
-      statusEl.classList.remove('hidden');
-    }
-  });
+  // 1) Instant paint from the static GitHub catalog (CDN, no Apps Script).
+  //    Fall back to localStorage if the catalog isn't reachable.
+  API.getCatalog()
+    .then(function (cat) { show(cat.forms); })
+    .catch(function () {
+      try {
+        var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+        if (cached && cached.length) show(cached);
+        else { statusEl.className = 'notice info'; statusEl.textContent = 'Loading forms…'; }
+      } catch (e) {}
+    });
+
+  // 2) Comparison check: reconcile against the live list so a form created
+  //    since the last catalog sync still appears (at current Apps Script speed).
+  API.listForms()
+    .then(function (forms) { show(forms); })
+    .catch(function (err) {
+      if (shown === null) {
+        statusEl.className = 'notice err';
+        statusEl.textContent = err.message;
+        statusEl.classList.remove('hidden');
+      }
+    });
 })();

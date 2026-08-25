@@ -1,0 +1,25 @@
+{
+  "generatedAt": "2026-08-25T00:00:00.000Z",
+  "forms": [
+    {
+      "formId": "frm_b843221d",
+      "title": "Test",
+      "description": "",
+      "schema": [
+        { "id": "u1", "type": "text", "label": "ID", "required": true },
+        { "id": "u3", "type": "email", "label": "email", "required": false }
+      ]
+    },
+    {
+      "formId": "frm_b4504f06",
+      "title": "Training Feedback form",
+      "description": "",
+      "schema": [
+        { "id": "u2", "type": "email", "label": "Email", "required": false },
+        { "id": "u3", "type": "text", "label": "Name", "required": false },
+        { "id": "u4", "type": "rating", "label": "Training Rating", "required": false, "max": "10" },
+        { "id": "u5", "type": "file", "label": "Photo", "required": false }
+      ]
+    }
+  ]
+}

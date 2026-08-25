@@ -27,6 +27,9 @@ function doGet(e) {
         return jsonOut_({ ok: true, forms: listForms_() });
       case 'getForm':
         return jsonOut_({ ok: true, form: getForm_(e.parameter.formId) });
+      case 'export':
+        // Full catalog (all active forms + schemas) for the static GitHub cache.
+        return jsonOut_({ ok: true, catalog: exportCatalog_() });
       case 'ping':
         return jsonOut_({ ok: true, pong: true });
       default:
@@ -107,6 +110,25 @@ function getForm_(formId) {
     description: row.description,
     schema: JSON.parse(row.schemaJson || '[]')
   };
+}
+
+// Every active form with its full schema, in one read — used to build the
+// static catalog.json that GitHub Pages serves instantly.
+function exportCatalog_() {
+  var sheet = ensureRegistry_();
+  var values = sheet.getDataRange().getValues();
+  var forms = [];
+  for (var i = 1; i < values.length; i++) {
+    var row = rowToObj_(values[i]);
+    if (String(row.active) === 'false') continue;
+    forms.push({
+      formId: row.formId,
+      title: row.title,
+      description: row.description,
+      schema: JSON.parse(row.schemaJson || '[]')
+    });
+  }
+  return { generatedAt: new Date().toISOString(), forms: forms };
 }
 
 function createForm_(body) {

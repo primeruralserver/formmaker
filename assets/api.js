@@ -54,7 +54,17 @@
     });
   }
 
+  // Static catalog served by GitHub Pages (CDN) — no Apps Script latency.
+  // Relative path so it works under the /formmaker/ project subpath.
+  async function getCatalog() {
+    var base = location.pathname.replace(/[^/]*$/, ''); // strip current filename
+    var res = await fetch(base + 'data/catalog.json?v=' + Date.now(), { cache: 'no-cache' });
+    if (!res.ok) throw new Error('No catalog');
+    return res.json();
+  }
+
   window.API = {
+    getCatalog: getCatalog,
     listForms: function () {
       return get('listForms').then(function (d) { return d.forms; });
     },
