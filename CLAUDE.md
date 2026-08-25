@@ -2,9 +2,14 @@
 
 Static form-builder web app on **GitHub Pages** that talks to a **Google Apps Script Web App**, storing everything in a **Google Sheet**. Building a form creates a new sheet tab; each submission appends a row to that tab.
 
+## Current status
+- ⚠️ **GitHub Pages is DISABLED** (user took the site down on 2026-08-25). The URL below returns 404. Re-enable with:
+  `gh api -X POST "repos/primeruralserver/formmaker/pages" -f "source[branch]=main" -f "source[path]=/"`
+- Repo, code, commits, and the sync Action are all intact — only the published site was stopped.
+
 ## Live locations
-- **Site:** https://primeruralserver.github.io/formmaker/
-- **Repo:** https://github.com/primeruralserver/formmaker (public, `main` branch, Pages from root)
+- **Site (currently offline):** https://primeruralserver.github.io/formmaker/
+- **Repo:** https://github.com/primeruralserver/formmaker (public, `main` branch; Pages was served from root)
 - **GitHub account:** `primeruralserver` (gh CLI authenticated; git author `DeimiwanDylan` / minha.primehub@gmail.com)
 - **Apps Script `/exec` URL:** stored in `config.js` (`window.APP_CONFIG.API_URL`). Public by design.
 
