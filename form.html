@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Form</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="btn ghost small" href="index.html">← All forms</a>
+    </div>
+
+    <div id="status" class="notice info">Loading…</div>
+
+    <div id="formCard" class="card hidden">
+      <h1 id="title"></h1>
+      <p id="description" class="muted"></p>
+      <form id="theForm" novalidate>
+        <div id="fields"></div>
+        <div id="formMsg"></div>
+        <div class="row end" style="margin-top:18px">
+          <button id="submitBtn" class="btn" type="submit">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/form.js"></script>
+</body>
+</html>

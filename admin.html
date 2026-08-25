@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Build a form</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>Build a form</h1>
+      <a class="btn ghost small" href="index.html">← All forms</a>
+    </div>
+
+    <div class="card">
+      <label class="field-label">Admin passphrase <span class="req">*</span></label>
+      <input type="password" id="pass" placeholder="Required to save" autocomplete="current-password" />
+      <p class="small muted" style="margin:6px 0 0">Checked by the server when you save. Held only for this session.</p>
+    </div>
+
+    <div class="card">
+      <label class="field-label">Form title <span class="req">*</span></label>
+      <input type="text" id="title" placeholder="e.g. Customer feedback" />
+
+      <label class="field-label">Description</label>
+      <textarea id="description" placeholder="Optional intro shown above the form"></textarea>
+    </div>
+
+    <h3 style="margin:24px 0 10px">Fields</h3>
+    <div id="fields"></div>
+
+    <div class="row">
+      <select id="newType">
+        <option value="text">Short text</option>
+        <option value="textarea">Long text (paragraph)</option>
+        <option value="number">Number</option>
+        <option value="email">Email</option>
+        <option value="date">Date</option>
+        <option value="dropdown">Dropdown</option>
+        <option value="radio">Single choice (radio)</option>
+        <option value="checkboxes">Multiple choice (checkboxes)</option>
+        <option value="rating">Rating / scale</option>
+        <option value="file">File upload</option>
+      </select>
+      <button class="btn secondary" id="addField" type="button">+ Add field</button>
+    </div>
+
+    <div id="msg"></div>
+
+    <div class="row end" style="margin-top:22px">
+      <a class="btn secondary" href="index.html">Cancel</a>
+      <button class="btn" id="saveBtn" type="button">Save form</button>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="assets/api.js"></script>
+  <script src="assets/builder.js"></script>
+</body>
+</html>
