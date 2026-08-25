@@ -14,12 +14,15 @@
 
 * { box-sizing: border-box; }
 
+html { -webkit-text-size-adjust: 100%; }
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);
   color: var(--ink);
   line-height: 1.5;
+  overflow-wrap: break-word;
 }
 
 a { color: var(--accent); text-decoration: none; }
@@ -74,15 +77,18 @@ input[type=password],
 textarea,
 select {
   width: 100%;
-  padding: 10px 12px;
+  max-width: 100%;
+  padding: 11px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  font-size: 15px;
+  /* 16px keeps iOS Safari from auto-zooming when a field gains focus. */
+  font-size: 16px;
   font-family: inherit;
   background: #fff;
   color: var(--ink);
 }
 textarea { min-height: 96px; resize: vertical; }
+input[type=file] { max-width: 100%; }
 
 input:focus, textarea:focus, select:focus {
   outline: none;
@@ -90,18 +96,27 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 0 0 3px rgba(45, 108, 223, 0.15);
 }
 
-.choices { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-.choice { display: flex; align-items: center; gap: 8px; font-weight: 400; }
-.choice input { width: auto; }
+.choices { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px; /* tappable rows */
+  font-weight: 400;
+  cursor: pointer;
+}
+.choice input { width: auto; width: 18px; height: 18px; flex: none; }
 
-.stars { display: flex; gap: 6px; font-size: 28px; line-height: 1; }
-.star { cursor: pointer; color: #c9ced6; user-select: none; }
+.stars { display: flex; gap: 10px; font-size: 30px; line-height: 1; flex-wrap: wrap; }
+.star { cursor: pointer; color: #c9ced6; user-select: none; touch-action: manipulation; }
 .star.on { color: #f2b01e; }
 
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  min-height: 44px; /* comfortable touch target */
   padding: 10px 18px;
   border-radius: 8px;
   border: 1px solid transparent;
@@ -109,12 +124,13 @@ input:focus, textarea:focus, select:focus {
   color: var(--accent-ink);
   font-size: 15px;
   font-weight: 600;
+  line-height: 1.2;
   cursor: pointer;
 }
 .btn:hover { filter: brightness(1.05); }
 .btn.secondary { background: #fff; color: var(--ink); border-color: var(--border); }
 .btn.ghost { background: transparent; color: var(--accent); border-color: transparent; padding: 6px 8px; }
-.btn.small { padding: 6px 12px; font-size: 13px; }
+.btn.small { padding: 6px 12px; font-size: 13px; min-height: 36px; }
 .btn:disabled { opacity: .6; cursor: default; }
 
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -145,4 +161,44 @@ input:focus, textarea:focus, select:focus {
   border-radius: 999px;
   background: #eef1f5;
   color: var(--muted);
+}
+
+/* ------------------------------------------------------------------ *
+ * Mobile / small screens
+ * ------------------------------------------------------------------ */
+@media (max-width: 600px) {
+  .wrap { padding: 20px 14px 56px; }
+
+  .topbar { margin-bottom: 18px; }
+  .topbar h1 { font-size: 19px; }
+
+  .card { padding: 16px; }
+
+  /* Builder rows stack so nothing overflows the viewport. */
+  .builder-field .row { flex-direction: column; align-items: stretch; }
+  .builder-field select,
+  .builder-field input,
+  .builder-field textarea {
+    width: 100%;
+    flex: none;
+    min-width: 0;
+  }
+  .builder-field .row.end { flex-direction: row; justify-content: flex-end; }
+  .builder-field .row.end .btn { width: auto; }
+
+  /* Type picker + add button: full width, stacked. */
+  #newType { width: 100%; }
+  #addField { width: 100%; }
+
+  /* Primary action rows go full-width and stack for easy thumbing. */
+  .row.end { flex-direction: column-reverse; align-items: stretch; }
+  .row.end .btn { width: 100%; }
+
+  .stars { font-size: 34px; gap: 12px; }
+}
+
+/* Very narrow phones */
+@media (max-width: 360px) {
+  .topbar h1 { font-size: 18px; }
+  .stars { font-size: 30px; }
 }
